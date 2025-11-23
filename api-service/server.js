@@ -138,18 +138,24 @@ app.use(express.static('public')); // Serve static files for UI
 // Feature flags configuration (stored in Redis for real-time updates)
 const getFeatureFlags = async () => {
   try {
-    const driver = await redis.get('feature:driver:enabled');
-    const trip = await redis.get('feature:trip:enabled');
-    const mobile = await redis.get('feature:mobile:enabled');
-    const marshal = await redis.get('feature:marshal:enabled');
+    // Get all feature flags at once
+    const [driver, trip, mobile, marshal] = await Promise.all([
+      redis.get('feature:driver:enabled'),
+      redis.get('feature:trip:enabled'),
+      redis.get('feature:mobile:enabled'),
+      redis.get('feature:marshal:enabled')
+    ]);
     
+    // Upstash Redis returns null if key doesn't exist, or the string value if it exists
+    // Convert to boolean: 'true' string = true, 'false' string = false, null = true (default enabled)
     return {
-      driver: driver !== 'false' && driver !== null, // Default: enabled
-      trip: trip !== 'false' && trip !== null,
-      mobile: mobile !== 'false' && mobile !== null,
-      marshal: marshal !== 'false' && marshal !== null,
+      driver: driver === null || driver === 'true' || driver === true,
+      trip: trip === null || trip === 'true' || trip === true,
+      mobile: mobile === null || mobile === 'true' || mobile === true,
+      marshal: marshal === null || marshal === 'true' || marshal === true,
     };
   } catch (error) {
+    console.error('Error getting feature flags:', error);
     // Fallback to defaults if Redis unavailable
     return {
       driver: true,
@@ -199,24 +205,44 @@ app.put('/api/config/features', async (req, res) => {
   try {
     const { features } = req.body;
     
-    if (features.driver !== undefined) {
-      await redis.set('feature:driver:enabled', features.driver ? 'true' : 'false');
-    }
-    if (features.trip !== undefined) {
-      await redis.set('feature:trip:enabled', features.trip ? 'true' : 'false');
-    }
-    if (features.mobile !== undefined) {
-      await redis.set('feature:mobile:enabled', features.mobile ? 'true' : 'false');
-    }
-    if (features.marshal !== undefined) {
-      await redis.set('feature:marshal:enabled', features.marshal ? 'true' : 'false');
+    if (!features || typeof features !== 'object') {
+      return res.status(400).json({ error: 'Invalid request body. Expected { features: { driver: boolean, ... } }' });
     }
     
+    // Update each feature flag that was provided
+    const updatePromises = [];
+    
+    if (features.driver !== undefined) {
+      updatePromises.push(redis.set('feature:driver:enabled', features.driver ? 'true' : 'false'));
+    }
+    if (features.trip !== undefined) {
+      updatePromises.push(redis.set('feature:trip:enabled', features.trip ? 'true' : 'false'));
+    }
+    if (features.mobile !== undefined) {
+      updatePromises.push(redis.set('feature:mobile:enabled', features.mobile ? 'true' : 'false'));
+    }
+    if (features.marshal !== undefined) {
+      updatePromises.push(redis.set('feature:marshal:enabled', features.marshal ? 'true' : 'false'));
+    }
+    
+    // Wait for all updates to complete
+    await Promise.all(updatePromises);
+    
+    // Get updated feature flags
     const updatedFeatures = await getFeatureFlags();
-    res.json({ features: updatedFeatures, message: 'Feature flags updated successfully' });
+    
+    console.log(`✅ Feature flags updated:`, updatedFeatures);
+    
+    res.json({ 
+      features: updatedFeatures, 
+      message: 'Feature flags updated successfully' 
+    });
   } catch (error) {
-    console.error('Error updating feature flags:', error);
-    res.status(500).json({ error: 'Failed to update feature flags' });
+    console.error('❌ Error updating feature flags:', error);
+    res.status(500).json({ 
+      error: 'Failed to update feature flags',
+      details: error.message 
+    });
   }
 });
 
@@ -257,6 +283,17 @@ app.post('/feedback', async (req, res) => {
     if (!validTypes.includes(type)) {
       return res.status(400).json({
         error: `Invalid type. Must be one of: ${validTypes.join(', ')}`,
+      });
+    }
+    
+    // Check feature flags - reject if the feedback type is disabled
+    const featureFlags = await getFeatureFlags();
+    const feedbackType = type === 'mobile' ? 'mobile' : type;
+    
+    if (!featureFlags[feedbackType]) {
+      return res.status(403).json({
+        error: `${feedbackType.charAt(0).toUpperCase() + feedbackType.slice(1)} feedback is currently disabled`,
+        message: 'This feedback type has been disabled by an administrator',
       });
     }
     

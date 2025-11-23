@@ -84,21 +84,38 @@ function navigateTo(page) {
 async function loadFeatureFlags() {
     try {
         const response = await fetch(`${API_BASE}/api/config/features`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
         
+        if (!data || !data.features) {
+            throw new Error('Invalid response format');
+        }
+        
         // Update checkboxes
-        document.getElementById('flag-driver').checked = data.features.driver;
-        document.getElementById('flag-trip').checked = data.features.trip;
-        document.getElementById('flag-mobile').checked = data.features.mobile;
-        document.getElementById('flag-marshal').checked = data.features.marshal;
+        const driverCheckbox = document.getElementById('flag-driver');
+        const tripCheckbox = document.getElementById('flag-trip');
+        const mobileCheckbox = document.getElementById('flag-mobile');
+        const marshalCheckbox = document.getElementById('flag-marshal');
+        
+        if (driverCheckbox) driverCheckbox.checked = data.features.driver === true || data.features.driver === 'true';
+        if (tripCheckbox) tripCheckbox.checked = data.features.trip === true || data.features.trip === 'true';
+        if (mobileCheckbox) mobileCheckbox.checked = data.features.mobile === true || data.features.mobile === 'true';
+        if (marshalCheckbox) marshalCheckbox.checked = data.features.marshal === true || data.features.marshal === 'true';
         
         // Update status
-        updateFlagStatus('driver', data.features.driver);
-        updateFlagStatus('trip', data.features.trip);
-        updateFlagStatus('mobile', data.features.mobile);
-        updateFlagStatus('marshal', data.features.marshal);
+        updateFlagStatus('driver', data.features.driver === true || data.features.driver === 'true');
+        updateFlagStatus('trip', data.features.trip === true || data.features.trip === 'true');
+        updateFlagStatus('mobile', data.features.mobile === true || data.features.mobile === 'true');
+        updateFlagStatus('marshal', data.features.marshal === true || data.features.marshal === 'true');
+        
+        console.log('✅ Feature flags loaded:', data.features);
     } catch (error) {
-        console.error('Error loading feature flags:', error);
+        console.error('❌ Error loading feature flags:', error);
+        showToast('Failed to load feature flags', 'error');
     }
 }
 
@@ -111,9 +128,25 @@ function updateFlagStatus(type, enabled) {
     }
 }
 
-// Toggle feature flag
-async function toggleFeature(type, enabled) {
+// BroadcastChannel for real-time feature flag updates
+let featureFlagChannel;
+try {
+    featureFlagChannel = new BroadcastChannel('feature-flags');
+} catch (e) {
+    console.warn('BroadcastChannel not supported, using localStorage fallback');
+}
+
+// Toggle feature flag (make it globally accessible)
+window.toggleFeature = async function toggleFeature(type, enabled) {
+    const checkbox = document.getElementById(`flag-${type}`);
+    if (!checkbox) {
+        console.error(`Checkbox not found: flag-${type}`);
+        return;
+    }
+    
     try {
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} feedback ${enabled ? 'enabling' : 'disabling'}...`, 'info');
+        
         const response = await fetch(`${API_BASE}/api/config/features`, {
             method: 'PUT',
             headers: {
@@ -126,20 +159,66 @@ async function toggleFeature(type, enabled) {
             }),
         });
         
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(errorData.error || `HTTP ${response.status}`);
+        }
+        
         const data = await response.json();
-        if (response.ok) {
-            updateFlagStatus(type, enabled);
-            // Show success feedback
-            console.log(`Feature ${type} ${enabled ? 'enabled' : 'disabled'}`);
+        
+        if (data && data.features) {
+            // Update all checkboxes with the latest values from server
+            const driverCheckbox = document.getElementById('flag-driver');
+            const tripCheckbox = document.getElementById('flag-trip');
+            const mobileCheckbox = document.getElementById('flag-mobile');
+            const marshalCheckbox = document.getElementById('flag-marshal');
+            
+            if (driverCheckbox) driverCheckbox.checked = data.features.driver === true || data.features.driver === 'true';
+            if (tripCheckbox) tripCheckbox.checked = data.features.trip === true || data.features.trip === 'true';
+            if (mobileCheckbox) mobileCheckbox.checked = data.features.mobile === true || data.features.mobile === 'true';
+            if (marshalCheckbox) marshalCheckbox.checked = data.features.marshal === true || data.features.marshal === 'true';
+            
+            // Update status displays
+            updateFlagStatus('driver', data.features.driver === true || data.features.driver === 'true');
+            updateFlagStatus('trip', data.features.trip === true || data.features.trip === 'true');
+            updateFlagStatus('mobile', data.features.mobile === true || data.features.mobile === 'true');
+            updateFlagStatus('marshal', data.features.marshal === true || data.features.marshal === 'true');
+            
+            // Broadcast the change to other tabs/windows (like feedback form)
+            const timestamp = Date.now();
+            const flagsData = JSON.stringify(data.features);
+            
+            // Always update localStorage (works for same-tab polling)
+            localStorage.setItem('feature-flags-updated', timestamp.toString());
+            localStorage.setItem('feature-flags', flagsData);
+            
+            // Use BroadcastChannel if available (works across tabs)
+            if (featureFlagChannel) {
+                featureFlagChannel.postMessage({
+                    type: 'feature-flags-updated',
+                    features: data.features,
+                    timestamp: timestamp
+                });
+            }
+            
+            // Dispatch custom event for same-tab communication
+            window.dispatchEvent(new CustomEvent('feature-flags-updated', {
+                detail: {
+                    features: data.features,
+                    timestamp: timestamp
+                }
+            }));
+            
+            showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} feedback ${enabled ? 'enabled' : 'disabled'}`, 'success');
+            console.log(`✅ Feature ${type} ${enabled ? 'enabled' : 'disabled'}`);
         } else {
-            // Revert checkbox
-            document.getElementById(`flag-${type}`).checked = !enabled;
-            alert('Failed to update feature flag');
+            throw new Error('Invalid response format');
         }
     } catch (error) {
-        console.error('Error toggling feature:', error);
-        document.getElementById(`flag-${type}`).checked = !enabled;
-        alert('Error updating feature flag');
+        console.error('❌ Error toggling feature:', error);
+        // Revert checkbox
+        checkbox.checked = !enabled;
+        showToast(`Failed to update ${type} feature: ${error.message}`, 'error');
     }
 }
 
