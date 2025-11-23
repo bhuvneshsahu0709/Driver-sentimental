@@ -25,10 +25,9 @@ Railway is the **recommended platform** for this project as it supports both Nod
 1. Railway will detect your repo
 2. Click "Add Service" → "GitHub Repo"
 3. Select your repo again
-4. In the settings, set:
-   - **Root Directory**: `api-service`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
+4. **IMPORTANT**: Go to Settings → Source → Set **Root Directory** to: `api-service`
+5. Railway will auto-detect Node.js and use the `railway.json` in that directory
+6. The start command will be: `npm start` (from railway.json)
 
 ### 3.2 Configure Environment Variables
 Go to the service → Variables tab, add:
@@ -49,10 +48,9 @@ MONGO_URI=your_mongodb_atlas_uri
 ### 4.1 Add Second Service
 1. In the same project, click "Add Service" → "GitHub Repo"
 2. Select the same repo
-3. In settings, set:
-   - **Root Directory**: `sentiment-worker`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python worker.py`
+3. **IMPORTANT**: Go to Settings → Source → Set **Root Directory** to: `sentiment-worker`
+4. Railway will auto-detect Python and use the `railway.json` in that directory
+5. The start command will be: `python worker.py` (from railway.json)
 
 ### 4.2 Configure Environment Variables
 Go to the worker service → Variables tab, add:
