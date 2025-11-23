@@ -16,9 +16,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Mobile Menu Toggle
+function toggleMobileMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('mobileMenuToggle');
+    sidebar.classList.toggle('open');
+    toggle.classList.toggle('active');
+}
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', (e) => {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('mobileMenuToggle');
+    if (window.innerWidth <= 768 && sidebar && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
+        sidebar.classList.remove('open');
+        toggle.classList.remove('active');
+    }
+});
+
+// Close mobile menu when navigating
+function closeMobileMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('mobileMenuToggle');
+    if (window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+        toggle.classList.remove('active');
+    }
+}
+
 // Navigation
 function navigateTo(page) {
     currentPage = page;
+    
+    // Close mobile menu on navigation
+    closeMobileMenu();
     
     // Update sidebar
     document.querySelectorAll('.nav-item').forEach(item => {

@@ -560,6 +560,33 @@ body {
     border-color: #000000;
 }
 
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 10001;
+    background: #000000;
+    color: #ffffff;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+    background: #ffffff;
+    color: #000000;
+}
+
+.mobile-menu-toggle.active {
+    background: #ffffff;
+    color: #000000;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .sidebar {
@@ -574,12 +601,28 @@ body {
     .charts-grid {
         grid-template-columns: 1fr;
     }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .page-header h1 {
+        font-size: 28px;
+    }
 }
 
 @media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
     .sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
+        z-index: 10000;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
     }
     
     .sidebar.open {
@@ -589,14 +632,176 @@ body {
     .main-content {
         margin-left: 0;
         padding: 16px;
+        padding-top: 80px;
     }
     
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .stat-card {
+        padding: 20px;
+    }
+    
+    .stat-card .value {
+        font-size: 32px;
     }
     
     .flags-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .chart-container {
+        padding: 20px;
+    }
+    
+    .chart-container canvas {
+        max-height: 250px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+    }
+    
+    .page-header h1 {
+        font-size: 24px;
+    }
+    
+    .refresh-btn {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 10px 8px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    
+    .feedback-item {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .feedback-item-score {
+        text-align: left;
+        width: 100%;
+    }
+    
+    .toast {
+        top: 70px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
+        transform: translateX(0) translateY(-20px);
+    }
+    
+    .toast.show {
+        transform: translateX(0) translateY(0);
+    }
+    
+    .feature-flags-panel {
+        padding: 20px;
+    }
+    
+    .recent-feedback {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 12px;
+        padding-top: 70px;
+    }
+    
+    .stat-card {
+        padding: 16px;
+    }
+    
+    .stat-card h3 {
+        font-size: 11px;
+    }
+    
+    .stat-card .value {
+        font-size: 28px;
+    }
+    
+    .page-header h1 {
+        font-size: 20px;
+    }
+    
+    .chart-container {
+        padding: 16px;
+    }
+    
+    .chart-container h3 {
+        font-size: 14px;
+    }
+    
+    .chart-container canvas {
+        max-height: 200px;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+    
+    .feedback-item {
+        padding: 12px;
+    }
+    
+    .feedback-item-comment {
+        font-size: 13px;
+    }
+    
+    .feedback-item-meta {
+        font-size: 11px;
+    }
+    
+    .sidebar-header {
+        padding: 24px 20px;
+    }
+    
+    .logo {
+        height: 35px;
+    }
+    
+    .sidebar-header p {
+        font-size: 11px;
+    }
+    
+    .nav-item {
+        padding: 14px 20px;
+        font-size: 14px;
+    }
+    
+    .sidebar-footer {
+        padding: 20px;
+    }
+    
+    .logout-btn {
+        padding: 10px;
+        font-size: 11px;
     }
 }
 

@@ -187,8 +187,16 @@ body {
     }
 
     .landing-header {
-        margin-bottom: 60px;
+        margin-bottom: 50px;
         padding-top: 20px;
+    }
+
+    .logo {
+        margin-bottom: 12px;
+    }
+
+    .logo-img {
+        height: 45px;
     }
 
     .logo h1 {
@@ -197,6 +205,10 @@ body {
 
     .tagline {
         font-size: 14px;
+    }
+
+    .landing-main {
+        padding: 30px 0;
     }
 
     .cards-container {
@@ -209,27 +221,100 @@ body {
         padding: 36px 24px;
     }
 
+    .card-icon {
+        margin-bottom: 20px;
+    }
+
+    .card-icon svg {
+        width: 40px;
+        height: 40px;
+    }
+
     .card h2 {
         font-size: 24px;
+        margin-bottom: 12px;
     }
 
     .card p {
         font-size: 14px;
+        margin-bottom: 24px;
+    }
+
+    .landing-footer {
+        padding: 30px 20px 16px;
+    }
+
+    .landing-footer p {
+        font-size: 12px;
     }
 }
 
 @media (max-width: 480px) {
+    .landing-container {
+        padding: 16px 12px;
+    }
+
+    .landing-header {
+        margin-bottom: 40px;
+        padding-top: 16px;
+    }
+
     .logo {
         flex-direction: column;
         gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .logo-img {
+        height: 40px;
     }
 
     .logo h1 {
         font-size: 24px;
     }
 
+    .tagline {
+        font-size: 13px;
+    }
+
+    .landing-main {
+        padding: 24px 0;
+    }
+
+    .cards-container {
+        gap: 20px;
+    }
+
     .card {
         padding: 32px 20px;
+    }
+
+    .card-icon {
+        margin-bottom: 16px;
+    }
+
+    .card-icon svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    .card h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .card p {
+        font-size: 13px;
+        margin-bottom: 20px;
+        max-width: 100%;
+    }
+
+    .landing-footer {
+        padding: 24px 16px 12px;
+    }
+
+    .landing-footer p {
+        font-size: 11px;
     }
 }
 

@@ -439,19 +439,131 @@ body {
 
     .feedback-nav {
         gap: 0;
+        margin-bottom: 24px;
     }
 
     .nav-link {
         padding: 12px 16px;
         font-size: 13px;
+        letter-spacing: 0.3px;
+    }
+
+    .form-header {
+        margin-bottom: 24px;
+        padding-bottom: 12px;
     }
 
     .form-header h2 {
         font-size: 24px;
     }
 
+    .form-header p {
+        font-size: 13px;
+    }
+
     .form-group {
         gap: 6px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+    }
+
+    .checkbox-item,
+    .radio-item {
+        padding: 10px;
+    }
+
+    .submit-section {
+        margin-top: 24px;
+        padding-top: 20px;
+    }
+
+    .submit-btn {
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .toast {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
+        transform: translateX(0) translateY(-20px);
+        padding: 14px 20px;
+    }
+
+    .toast.show {
+        transform: translateX(0) translateY(0);
+    }
+}
+
+@media (max-width: 480px) {
+    .feedback-container {
+        padding: 12px;
+    }
+
+    .feedback-nav {
+        margin-bottom: 20px;
+    }
+
+    .nav-link {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .form-header h2 {
+        font-size: 20px;
+    }
+
+    .form-header p {
+        font-size: 12px;
+    }
+
+    .form-group {
+        gap: 5px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .form-group textarea {
+        min-height: 90px;
+    }
+
+    .checkbox-item,
+    .radio-item {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .submit-btn {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    .message {
+        padding: 12px;
+        font-size: 13px;
     }
 }
 
