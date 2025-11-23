@@ -418,15 +418,15 @@ def poll_queue():
     
     while True:
         try:
-            # Blocking pop from queue (waits up to 5 seconds)
-            # This will wait for new jobs and return immediately when one arrives
-            result = redis_client.blpop([queue_name], timeout=5)
+            # Non-blocking pop from queue (Upstash REST API doesn't support blocking operations)
+            # Use rpop to get the rightmost (oldest) item from the list
+            job_data_str = redis_client.rpop(queue_name)
             
-            if result is None:
-                # Timeout - no jobs available, continue polling
+            if job_data_str is None:
+                # No jobs available, wait a bit before polling again
+                time.sleep(1)
                 continue
             
-            list_key, job_data_str = result
             logger.info(f"📥 Received feedback from queue (data length: {len(job_data_str)} chars)")
             logger.debug(f"Raw job data preview: {job_data_str[:200]}...")
             
