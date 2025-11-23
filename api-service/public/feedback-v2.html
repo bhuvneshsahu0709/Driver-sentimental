@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoveInSync - Feedback Portal</title>
+    <link rel="stylesheet" href="feedback-v2-styles.css">
+</head>
+<body>
+    <div class="feedback-container">
+        <!-- Top Navigation -->
+        <nav class="feedback-nav" id="feedbackNav">
+            <!-- Dynamically populated based on feature flags -->
+        </nav>
+
+        <!-- Form Container -->
+        <div class="form-wrapper">
+            <div class="form-container" id="formContainer">
+                <!-- Forms will be dynamically loaded here -->
+                <div class="loading-state" id="loadingState">
+                    <p>Loading form...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="feedback-v2.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoveInSync - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="admin-v2-styles.css">
+</head>
+<body>
+    <script src="auth.js"></script>
+    <script>
+        if (!requireAuth()) {
+            // Redirect will happen in requireAuth
+        }
+    </script>
+
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="moveinsync.jpg" alt="MoveInSync" class="logo">
+                </div>
+                <p>Admin Dashboard</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="home" onclick="navigateTo('home'); return false;">
+                    <span>Home</span>
+                </a>
+                <a href="#" class="nav-item" data-page="driver" onclick="navigateTo('driver'); return false;">
+                    <span>Driver</span>
+                </a>
+                <a href="#" class="nav-item" data-page="trip" onclick="navigateTo('trip'); return false;">
+                    <span>Trip</span>
+                </a>
+                <a href="#" class="nav-item" data-page="mobile" onclick="navigateTo('mobile'); return false;">
+                    <span>Mobile</span>
+                </a>
+                <a href="#" class="nav-item" data-page="marshal" onclick="navigateTo('marshal'); return false;">
+                    <span>Marshal</span>
+                </a>
+                <a href="#" class="nav-item" data-page="alerts" onclick="navigateTo('alerts'); return false;">
+                    <span>Alerts</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Home Page -->
+            <div class="page active" id="page-home">
+                <div class="page-header">
+                    <h1>Dashboard Overview</h1>
+                    <button class="refresh-btn" onclick="refreshAll()">Refresh</button>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="stats-grid" id="overviewStats">
+                    <div class="stat-card">
+                        <h3>Total Feedback</h3>
+                        <div class="value" id="totalFeedback">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Sentiment</h3>
+                        <div class="value" id="avgSentiment">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Drivers</h3>
+                        <div class="value" id="activeDrivers">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Trips</h3>
+                        <div class="value" id="totalTrips">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Marshal Services</h3>
+                        <div class="value" id="marshalServices">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Mobile Feedbacks</h3>
+                        <div class="value" id="mobileFeedbacks">-</div>
+                    </div>
+                </div>
+
+                <!-- Feature Flag Controls -->
+                <div class="feature-flags-panel">
+                    <h2>Feature Flags</h2>
+                    <p class="subtitle">Enable or disable feedback types</p>
+                    <div class="flags-grid">
+                        <div class="flag-item">
+                            <label>
+                                <input type="checkbox" id="flag-driver" onchange="toggleFeature('driver', this.checked)">
+                                <span>Enable Driver Feedback</span>
+                            </label>
+                            <span class="flag-status" id="status-driver">Enabled</span>
+                        </div>
+                        <div class="flag-item">
+                            <label>
+                                <input type="checkbox" id="flag-trip" onchange="toggleFeature('trip', this.checked)">
+                                <span>Enable Trip Feedback</span>
+                            </label>
+                            <span class="flag-status" id="status-trip">Enabled</span>
+                        </div>
+                        <div class="flag-item">
+                            <label>
+                                <input type="checkbox" id="flag-mobile" onchange="toggleFeature('mobile', this.checked)">
+                                <span>Enable Mobile Feedback</span>
+                            </label>
+                            <span class="flag-status" id="status-mobile">Enabled</span>
+                        </div>
+                        <div class="flag-item">
+                            <label>
+                                <input type="checkbox" id="flag-marshal" onchange="toggleFeature('marshal', this.checked)">
+                                <span>Enable Marshal Feedback</span>
+                            </label>
+                            <span class="flag-status" id="status-marshal">Enabled</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combined Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Feedback by Type</h3>
+                        <canvas id="feedbackByTypeChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Sentiment Trends</h3>
+                        <canvas id="sentimentTrendsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Feedback -->
+                <div class="recent-feedback">
+                    <h3>Recent Feedback</h3>
+                    <div id="recentFeedbackList" class="feedback-list">
+                        <p class="loading">Loading recent feedback...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driver Page -->
+            <div class="page" id="page-driver">
+                <div class="page-header">
+                    <h1>Driver Analytics</h1>
+                    <button class="refresh-btn" onclick="refreshPage('driver')">Refresh</button>
+                </div>
+                <div id="driverContent">
+                    <p class="loading">Loading driver analytics...</p>
+                </div>
+            </div>
+
+            <!-- Trip Page -->
+            <div class="page" id="page-trip">
+                <div class="page-header">
+                    <h1>Trip Analytics</h1>
+                    <button class="refresh-btn" onclick="refreshPage('trip')">Refresh</button>
+                </div>
+                <div id="tripContent">
+                    <p class="loading">Loading trip analytics...</p>
+                </div>
+            </div>
+
+            <!-- Mobile Page -->
+            <div class="page" id="page-mobile">
+                <div class="page-header">
+                    <h1>Mobile App Analytics</h1>
+                    <button class="refresh-btn" onclick="refreshPage('mobile')">Refresh</button>
+                </div>
+                <div id="mobileContent">
+                    <p class="loading">Loading mobile analytics...</p>
+                </div>
+            </div>
+
+            <!-- Marshal Page -->
+            <div class="page" id="page-marshal">
+                <div class="page-header">
+                    <h1>Marshal Analytics</h1>
+                    <button class="refresh-btn" onclick="refreshPage('marshal')">Refresh</button>
+                </div>
+                <div id="marshalContent">
+                    <p class="loading">Loading marshal analytics...</p>
+                </div>
+            </div>
+
+            <!-- Alerts Page -->
+            <div class="page" id="page-alerts">
+                <div class="page-header">
+                    <h1>Driver Alerts</h1>
+                    <button class="refresh-btn" onclick="refreshPage('alerts')">Refresh</button>
+                </div>
+                <div id="alertsContent">
+                    <p class="loading">Loading alerts...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="admin-v2.js"></script>
+</body>
+</html>
+

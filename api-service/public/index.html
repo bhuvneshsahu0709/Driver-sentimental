@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoveInSync - Driver Sentiment Engine</title>
+    <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+    <div class="landing-container">
+        <header class="landing-header">
+            <div class="logo">
+                <img src="moveinsync.jpg" alt="MoveInSync" class="logo-img">
+            </div>
+            <p class="tagline">Driver Sentiment Analytics Platform</p>
+        </header>
+
+        <main class="landing-main">
+            <div class="cards-container">
+                <!-- Admin Panel Card -->
+                <div class="card admin-card" onclick="redirectToAdmin()">
+                    <div class="card-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                            <path d="M2 17L12 22L22 17"/>
+                            <path d="M2 12L12 17L22 12"/>
+                        </svg>
+                    </div>
+                    <h2>Admin Panel</h2>
+                    <p>Access analytics dashboard, view driver performance metrics, and monitor sentiment scores.</p>
+                </div>
+
+                <!-- Passenger Panel Card -->
+                <div class="card passenger-card" onclick="redirectToPassenger()">
+                    <div class="card-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <h2>Passenger Portal</h2>
+                    <p>Submit feedback about your trip experience, driver, app, or marshal service.</p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="landing-footer">
+            <p>&copy; 2025 MoveInSync. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="landing.js"></script>
+</body>
+</html>
