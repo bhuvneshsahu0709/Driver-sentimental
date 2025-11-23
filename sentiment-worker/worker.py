@@ -28,10 +28,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration
-# Upstash Redis URL format: redis://default:<password>@<endpoint>.upstash.io:6379
-REDIS_URL =  os.getenv('UPSTASH_REDIS_URL')
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379)) if os.getenv('REDIS_PORT') else 6379
+# Upstash Redis REST API credentials
+UPSTASH_REDIS_REST_URL = os.getenv('UPSTASH_REDIS_REST_URL')
+UPSTASH_REDIS_REST_TOKEN = os.getenv('UPSTASH_REDIS_REST_TOKEN')
 # MongoDB Connection String - Using MongoDB Atlas
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb+srv://bhuvnesh:bhuvnesh@cluster0.nm7zbfj.mongodb.net/movesync?retryWrites=true&w=majority')
 MONGO_DB = os.getenv('MONGO_DB', 'movesync')
@@ -48,30 +47,18 @@ except LookupError:
 
 sia = SentimentIntensityAnalyzer()
 
-# Initialize Redis connection - Using Upstash Redis
-if REDIS_URL:
-    # Upstash Redis connection using URL
-    # Format: redis://default:<password>@<endpoint>.upstash.io:6379
-    try:
-        redis_client = redis.from_url(
-            REDIS_URL,
-            decode_responses=True,
-            socket_connect_timeout=10,
-            ssl_cert_reqs=None,  # Upstash uses TLS
-        )
-        logger.info(f"✅ Connecting to Upstash Redis using URL")
-    except Exception as e:
-        logger.error(f"❌ Failed to connect to Upstash Redis: {e}")
-        raise
-else:
-    # Fallback to host/port (for backward compatibility)
-    redis_client = redis.Redis(
-        host=REDIS_HOST,
-        port=REDIS_PORT,
-        decode_responses=True,
-        socket_connect_timeout=5
+# Initialize Upstash Redis REST API client
+if not UPSTASH_REDIS_REST_URL or not UPSTASH_REDIS_REST_TOKEN:
+    raise ValueError(
+        'Upstash Redis credentials are not set in the environment variables. '
+        'Please set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in your .env file. '
+        'Get these from: https://console.upstash.com/ → Your Database → REST API'
     )
-    logger.info(f"✅ Connecting to Redis at {REDIS_HOST}:{REDIS_PORT}")
+
+redis_client = Redis(
+    url=UPSTASH_REDIS_REST_URL,
+    token=UPSTASH_REDIS_REST_TOKEN,
+)
 
 # Initialize MongoDB connection
 mongo_client = None
