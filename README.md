@@ -16,6 +16,11 @@ Event-driven backend system for analyzing driver feedback sentiment, calculating
 # Feedback Form
 <img width="1893" height="963" alt="Screenshot 2025-11-24 000919" src="https://github.com/user-attachments/assets/56a91be3-3bce-412e-a28f-d242aa9edb0d" />
 
+# 🔐 Admin Login Credentials
+
+To access the Admin Dashboard, use the following credentials:
+Username: admin
+Password: 12345
 
 ## Architecture
 
