@@ -10,8 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
         loadFeatureFlags();
         loadHomePage();
         setInterval(() => {
-            if (currentPage === 'home') loadHomePage();
-            else refreshPage(currentPage);
+            // Background refresh without showing toast
+            if (currentPage === 'home') {
+                loadHomePage();
+            } else if (currentPage === 'alerts') {
+                updateAlertsPage(); // Silent background update
+            } else {
+                loadAnalyticsPage(currentPage);
+            }
         }, 30000); // Auto-refresh every 30 seconds
     }
 });
@@ -583,7 +589,7 @@ function loadDriverAnalytics(data) {
     // Additional driver-specific visualizations can be added here
 }
 
-// Load alerts page
+// Load alerts page (initial load - replaces HTML)
 async function loadAlertsPage() {
     const contentEl = document.getElementById('alertsContent');
     if (!contentEl) return;
@@ -611,106 +617,152 @@ async function loadAlertsPage() {
     }
 }
 
-// Generate alerts page HTML
-function generateAlertsPageHTML(data) {
-    const alerts = data.alerts || [];
-    const threshold = data.threshold || 2.5;
+// Update alerts page in background (only updates data, doesn't replace HTML)
+async function updateAlertsPage() {
+    const contentEl = document.getElementById('alertsContent');
+    if (!contentEl) return;
     
-    if (alerts.length === 0) {
-        return `
-            <div class="no-alerts">
-                <h2>✅ No Active Alerts</h2>
-                <p>All driver scores are above the threshold (${threshold}).</p>
-            </div>
-        `;
+    // Check if alerts page is already loaded (has table structure)
+    const alertsTable = contentEl.querySelector('.data-table tbody');
+    const noAlertsDiv = contentEl.querySelector('.no-alerts');
+    const alertValueEl = contentEl.querySelector('.alert-value');
+    
+    // If page structure doesn't exist, do a full load instead
+    if (!alertsTable && !noAlertsDiv) {
+        await loadAlertsPage();
+        return;
     }
     
-    return `
-        <div class="alerts-summary">
-            <div class="stat-card alert-card">
-                <h3>Active Alerts</h3>
-                <div class="value alert-value">${alerts.length}</div>
-                <p>Drivers with score below ${threshold}</p>
-            </div>
-        </div>
+    try {
+        const response = await fetch(`${API_BASE}/api/alerts`);
         
-        <div class="alerts-list">
-            <h3>Drivers Requiring Attention</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Driver ID</th>
-                        <th>Current Score</th>
-                        <th>Threshold</th>
-                        <th>Alert Status</th>
-                        <th>Cooldown</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${alerts.map(alert => {
-                        const alertStatus = alert.alertTriggered 
-                            ? '<span class="alert-badge triggered">Alert Triggered</span>'
-                            : '<span class="alert-badge pending">⚠️ Below Threshold</span>';
-                        
-                        const cooldownText = alert.cooldownMinutes 
-                            ? `${alert.cooldownMinutes} min remaining`
-                            : 'No cooldown';
-                        
-                        return `
-                            <tr class="alert-row ${alert.alertTriggered ? 'alert-active' : ''}">
-                                <td><strong>${alert.driverId}</strong></td>
-                                <td>
-                                    <span class="score-badge ${alert.score < 2.0 ? 'danger' : 'warning'}">
-                                        ${alert.score.toFixed(2)}
-                                    </span>
-                                </td>
-                                <td>${threshold}</td>
-                                <td>${alertStatus}</td>
-                                <td>${cooldownText}</td>
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data || !data.alerts) {
+            throw new Error('Invalid data format');
+        }
+        
+        const alerts = data.alerts || [];
+        const threshold = data.threshold || 2.5;
+        
+        // Update alert count
+        if (alertValueEl) {
+            alertValueEl.textContent = alerts.length;
+        }
+        
+        // Handle no alerts case
+        if (alerts.length === 0) {
+            if (noAlertsDiv) {
+                // Already showing no alerts, just update threshold text
+                const thresholdText = noAlertsDiv.querySelector('p');
+                if (thresholdText) {
+                    thresholdText.textContent = `All driver scores are above the threshold (${threshold}).`;
+                }
+            } else {
+                // Replace table with no alerts message
+                const alertsList = contentEl.querySelector('.alerts-list');
+                const alertsSummary = contentEl.querySelector('.alerts-summary');
+                if (alertsList) alertsList.remove();
+                if (alertsSummary) alertsSummary.remove();
+                
+                const existingNoAlerts = contentEl.querySelector('.no-alerts');
+                if (!existingNoAlerts) {
+                    contentEl.insertAdjacentHTML('afterbegin', `
+                        <div class="no-alerts">
+                            <h2>✅ No Active Alerts</h2>
+                            <p>All driver scores are above the threshold (${threshold}).</p>
+                        </div>
+                    `);
+                }
+            }
+            return;
+        }
+        
+        // Remove no alerts message if it exists
+        if (noAlertsDiv) {
+            noAlertsDiv.remove();
+        }
+        
+        // Ensure summary exists
+        let alertsSummary = contentEl.querySelector('.alerts-summary');
+        if (!alertsSummary) {
+            contentEl.insertAdjacentHTML('afterbegin', `
+                <div class="alerts-summary">
+                    <div class="stat-card alert-card">
+                        <h3>Active Alerts</h3>
+                        <div class="value alert-value">${alerts.length}</div>
+                        <p>Drivers with score below ${threshold}</p>
+                    </div>
+                </div>
+            `);
+        } else {
+            // Update summary values
+            const summaryValue = alertsSummary.querySelector('.alert-value');
+            const summaryText = alertsSummary.querySelector('p');
+            if (summaryValue) summaryValue.textContent = alerts.length;
+            if (summaryText) summaryText.textContent = `Drivers with score below ${threshold}`;
+        }
+        
+        // Ensure alerts list exists
+        let alertsList = contentEl.querySelector('.alerts-list');
+        if (!alertsList) {
+            contentEl.insertAdjacentHTML('beforeend', `
+                <div class="alerts-list">
+                    <h3>Drivers Requiring Attention</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Driver ID</th>
+                                <th>Current Score</th>
+                                <th>Threshold</th>
+                                <th>Alert Status</th>
+                                <th>Cooldown</th>
                             </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="alerts-info">
-            <h4>About Alerts</h4>
-            <ul>
-                <li>Alerts are triggered when a driver's sentiment score drops below ${threshold}</li>
-                <li>Each alert has a 30-minute cooldown to prevent spam</li>
-                <li>Check the worker logs for detailed alert information</li>
-                <li>Scores are calculated using EMA (Exponential Moving Average) from feedback sentiment</li>
-            </ul>
-        </div>
-    `;
-}
-
-// Load alerts page
-async function loadAlertsPage() {
-    const contentEl = document.getElementById('alertsContent');
-    if (!contentEl) return;
-    
-    contentEl.innerHTML = '<p class="loading">Loading alerts...</p>';
-    
-    try {
-        const response = await fetch(`${API_BASE}/api/alerts`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            `);
+            alertsList = contentEl.querySelector('.alerts-list');
         }
         
-        const data = await response.json();
-        
-        if (!data || !data.alerts) {
-            throw new Error('Invalid data format');
+        // Update table body
+        const tbody = alertsList.querySelector('tbody');
+        if (tbody) {
+            tbody.innerHTML = alerts.map(alert => {
+                const alertStatus = alert.alertTriggered 
+                    ? '<span class="alert-badge triggered">Alert Triggered</span>'
+                    : '<span class="alert-badge pending">⚠️ Below Threshold</span>';
+                
+                const cooldownText = alert.cooldownMinutes 
+                    ? `${alert.cooldownMinutes} min remaining`
+                    : 'No cooldown';
+                
+                const scoreClass = alert.score < 2.0 ? 'critical' : 'warning';
+                
+                return `
+                    <tr class="alert-row ${alert.alertTriggered ? 'alert-active' : ''}">
+                        <td><strong>${alert.driverId}</strong></td>
+                        <td>
+                            <span class="score-badge ${scoreClass}">
+                                ${alert.score.toFixed(2)}
+                            </span>
+                        </td>
+                        <td>${threshold}</td>
+                        <td>${alertStatus}</td>
+                        <td>${cooldownText}</td>
+                    </tr>
+                `;
+            }).join('');
         }
         
-        contentEl.innerHTML = generateAlertsPageHTML(data);
     } catch (error) {
-        console.error('Error loading alerts:', error);
-        contentEl.innerHTML = `<p class="loading">Error loading alerts: ${error.message}</p>`;
-        showToast('Error loading alerts', 'error');
+        console.error('Error updating alerts:', error);
+        // Don't show toast on background refresh to avoid interrupting user
     }
 }
 
@@ -759,11 +811,13 @@ function generateAlertsPageHTML(data) {
                             ? `${alert.cooldownMinutes} min remaining`
                             : 'No cooldown';
                         
+                        const scoreClass = alert.score < 2.0 ? 'critical' : 'warning';
+                        
                         return `
                             <tr class="alert-row ${alert.alertTriggered ? 'alert-active' : ''}">
                                 <td><strong>${alert.driverId}</strong></td>
                                 <td>
-                                    <span class="score-badge ${alert.score < 2.0 ? 'critical' : 'warning'}">
+                                    <span class="score-badge ${scoreClass}">
                                         ${alert.score.toFixed(2)}
                                     </span>
                                 </td>
@@ -803,6 +857,8 @@ function refreshPage(page) {
     showToast('Refreshing data...', 'info');
     if (page === 'home') {
         loadHomePage();
+    } else if (page === 'alerts') {
+        updateAlertsPage(); // Use background update instead of full reload
     } else {
         loadAnalyticsPage(page);
     }
