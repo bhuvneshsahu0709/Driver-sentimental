@@ -1,11 +1,21 @@
 # Driver Sentiment Engine
-
 Event-driven backend system for analyzing driver feedback sentiment, calculating real-time scores, and triggering alerts.
 
-<img width="1893" height="963" alt="Screenshot 2025-11-24 000919" src="https://github.com/user-attachments/assets/56a91be3-3bce-412e-a28f-d242aa9edb0d" />
-<img width="1891" height="950" alt="Screenshot 2025-11-24 000843" src="https://github.com/user-attachments/assets/009d86b2-c066-4dd0-8cec-6cefddb81915" />
-<img width="1895" height="962" alt="Screenshot 2025-11-24 000601" src="https://github.com/user-attachments/assets/125b36f4-87da-43f6-94ed-562cad710586" />
+# App Landing Page
 <img width="1891" height="968" alt="Screenshot 2025-11-24 000538" src="https://github.com/user-attachments/assets/519c32e5-1f3c-4e9e-8cdb-2fa69d90393b" />
+
+# Dashboard Overview
+<img width="1895" height="962" alt="Screenshot 2025-11-24 000601" src="https://github.com/user-attachments/assets/125b36f4-87da-43f6-94ed-562cad710586" />
+
+# Sentimental Trends
+<img width="1891" height="950" alt="Screenshot 2025-11-24 000843" src="https://github.com/user-attachments/assets/009d86b2-c066-4dd0-8cec-6cefddb81915" />
+
+# Driver Alert System
+<img width="1884" height="966" alt="Screenshot 2025-11-24 001721" src="https://github.com/user-attachments/assets/759ca878-6d56-4cf1-8438-c9c8eb9b3f20" />
+
+# Feedback Form
+<img width="1893" height="963" alt="Screenshot 2025-11-24 000919" src="https://github.com/user-attachments/assets/56a91be3-3bce-412e-a28f-d242aa9edb0d" />
+
 
 ## Architecture
 
