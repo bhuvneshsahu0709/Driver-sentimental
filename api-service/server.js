@@ -133,6 +133,12 @@ let mongoDb;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Preserve legacy admin URLs
+app.get(['/admin', '/admin.html', '/admin/'], (req, res) => {
+  res.redirect(301, '/admin-v2.html');
+});
+
 app.use(express.static('public')); // Serve static files for UI
 
 // Feature flags configuration (stored in Redis for real-time updates)

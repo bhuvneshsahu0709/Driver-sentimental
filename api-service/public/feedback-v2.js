@@ -13,7 +13,54 @@ try {
 }
 
 // Initialize
+function ensureBackHomeControl() {
+    const wrapperSelector = '[data-back-home-wrapper="top"]';
+    let wrapper = document.querySelector(wrapperSelector);
+
+    if (!wrapper) {
+        const container = document.querySelector('.feedback-container');
+        if (!container) return;
+        
+        wrapper = document.createElement('div');
+        wrapper.className = 'top-bar';
+        wrapper.setAttribute('data-back-home-wrapper', 'top');
+        container.insertBefore(wrapper, container.firstChild);
+    }
+
+    let button = wrapper.querySelector('[data-back-home]');
+    if (!button) {
+        button = document.createElement('a');
+        button.className = 'back-home-btn';
+        button.href = '/index.html';
+        button.role = 'button';
+        button.setAttribute('data-back-home', 'true');
+        button.textContent = '← Back to Home';
+        wrapper.appendChild(button);
+    }
+
+    button.setAttribute('data-back-home', 'true');
+    button.id = 'backHomeBtnTop';
+}
+
+function bindBackHomeEvents() {
+    const triggers = document.querySelectorAll('[data-back-home]');
+    triggers.forEach(trigger => {
+        if (!trigger.dataset.bound) {
+            trigger.dataset.bound = 'true';
+            trigger.addEventListener('click', handleBackHomeNavigation);
+        }
+    });
+}
+
+function handleBackHomeNavigation(event) {
+    event.preventDefault();
+    window.location.href = '/index.html';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    ensureBackHomeControl();
+    bindBackHomeEvents();
+
     await loadFeatureFlags();
     renderNavigation();
     loadForm('driver');

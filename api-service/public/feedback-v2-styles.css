@@ -19,6 +19,35 @@ body {
     padding: 20px;
 }
 
+.top-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: 2px solid #000000;
+    background: transparent;
+    color: #000000;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.back-home-btn:hover {
+    background: #000000;
+    color: #ffffff;
+}
+
 /* Top Navigation */
 .feedback-nav {
     display: flex;

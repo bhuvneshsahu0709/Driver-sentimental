@@ -1,8 +1,22 @@
 // Landing Page Handler
 
+const AUTH_KEY = 'movesync_admin_auth';
+
+function isAdminAuthenticated() {
+    try {
+        return sessionStorage.getItem(AUTH_KEY) === 'true';
+    } catch (err) {
+        return false;
+    }
+}
+
 function redirectToAdmin() {
-    // Redirect to login page (which will check auth and redirect to admin)
-    window.location.href = '/login.html';
+    if (isAdminAuthenticated()) {
+        window.location.href = '/admin-v2.html';
+    } else {
+        // Redirect to login page (which will check auth and redirect to admin)
+        window.location.href = '/login.html';
+    }
 }
 
 // Update login redirect to new admin dashboard
